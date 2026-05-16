@@ -531,79 +531,43 @@ elif  menu=="Ingresos":
                 key="barras_general_dep_ds"
                 )
             #########################################################################################
-            ##Grafica barras sin porcentaje DEPTO
-            st.subheader(
-            f"Participación del SGP en los ingresos corrientes de la nación - {seleccionar_depto}"
-            )
-            barras_icd = (
-                  df_sgp_filtrado.groupby(["Año", "nivel_1"])["valor_sgp_ingresos_corrientes"]
-                .sum()
-                .reset_index()
-            )
-
-            ## gráfica barras normal
-            fig_barras_icd = px.bar(
-                barras_icd,
-                x="Año",
-                y="valor_sgp_ingresos_corrientes",
-                color="nivel_1",
-                color_discrete_map=COLORES_SGP,
-                barmode="stack"
-            )
-
-            ## estética
-            fig_barras_icd.update_yaxes(
-                title=None
-            )
-
-            fig_barras_icd.update_layout(legend_title=None)
-
-            fig_barras_icd.update_xaxes(
-                tickmode="array",
-                tickvals=[2012,2014,2016,2018,2020,2022,2024],
-                ticktext=["2012","2014","2016","2018","2020","2022","2024"],
-                range=[2011.8, 2024.8]
-            )
-
-            fig_barras_icd.update_layout(
-                legend=dict(
-                    orientation="h",
-                    yanchor="top",
-                    y=-0.2,
-                    xanchor="left",
-                    x=0
-                )
-            )
-
-            st.plotly_chart(
-                fig_barras_icd,
-                use_container_width=True,
-                key="barras_icd_departamental"
-            )
-            
-            
-           
-            
+           ##aca iba la grafica
         ###################################################################################################  
         ##########################MUNICIPAL##############################################################
     with tab3:
 
         ##Filtro de departamento
         ###Crear una lista sin Bogota(MI FILL)departamentos para seleccionar
-        departamentos_mun = sorted(
+        departamentos_mun = ["Todos"] + sorted(
         df.loc[
-        ~df["Departamento"].astype(str).str.strip().str.lower().str.contains("bogot", na=False),
-        "Departamento"
-        ].dropna().unique()
-         )
+                ~df["Departamento"].astype(str)
+                .str.strip()
+                .str.lower()
+                .str.contains("bogot", na=False),
+                "Departamento"
+            ].dropna().unique()
+        )
         ###SELECTOR
         seleccionar_depto_mun=st.selectbox("Selecciona un Departamento", departamentos_mun ,key="mun_depto")
         ##se queda solo con el depto seleccionado y municipios (MI FILL)
-        df_municipios_base = df[
-         (df["Departamento"] == seleccionar_depto_mun) &
-         (df["Tipo de Entidad"] == "Municipio") &
-         (~df["Entidad"].astype(str).str.strip().str.lower().str.contains("bogot", na=False))
-         ].copy()
+        if seleccionar_depto_mun == "Todos":
+            df_municipios_base = df[
+                (df["Tipo de Entidad"] == "Municipio") &
+                (~df["Entidad"].astype(str)
+                .str.strip()
+                .str.lower()
+                .str.contains("bogot", na=False))
+            ].copy()
+
+        else:
+            df_municipios_base = df[
+                (df["Departamento"] == seleccionar_depto_mun) &
+                (df["Tipo de Entidad"] == "Municipio") &
+                (~df["Entidad"].astype(str)
+                .str.strip()
+                .str.lower()
+                .str.contains("bogot", na=False))
+            ].copy()
         #################################################################################
         municipios_lista = ["Todos"] + sorted(df_municipios_base["Entidad"].dropna().unique())
         ##Filtro Municipio
@@ -615,6 +579,7 @@ elif  menu=="Ingresos":
            df_filtrado_m_d = df_municipios_base[
            df_municipios_base["Entidad"] == seleccionar_municipio
            ].copy()
+           ##########################################################################################
         st.write("Cifras en miles de millones de pesos")
         col1, col2 = st.columns(2)
         with col1: 
@@ -841,57 +806,7 @@ elif  menu=="Ingresos":
                 key="barras_general_ms_s"
                 )
             ####################################################################################
-        ##Grafica barras sin porcentaje
-        st.subheader(
-        f"Participación del SGP en los ingresos corrientes de la nación - {seleccionar_municipio}"
-        )
-        barras_icm = (
-                   df_sgp_municipio.groupby(["Año", "nivel_1"])["valor_sgp_ingresos_corrientes"]
-                .sum()
-            .reset_index()
-        )
-
-        ## gráfica barras normal
-        fig_barras_icm = px.bar(
-            barras_icm,
-            x="Año",
-            y="valor_sgp_ingresos_corrientes",
-            color="nivel_1",
-            color_discrete_map=COLORES_SGP,
-            barmode="stack"
-        )
-
-        ## estética
-        fig_barras_icm.update_yaxes(
-            title=None 
-        )
-
-        fig_barras_icm.update_layout(legend_title=None)
-
-        fig_barras_icm.update_xaxes(
-            tickmode="array",
-            tickvals=[2012,2014,2016,2018,2020,2022,2024],
-            ticktext=["2012","2014","2016","2018","2020","2022","2024"],
-            range=[2011.8, 2024.8]
-        )
-
-        fig_barras_icm.update_layout(
-            legend=dict(
-                orientation="h",
-                yanchor="top",
-                y=-0.2,
-                xanchor="left",
-                x=0
-            )
-        )
-
-        st.plotly_chart(
-            fig_barras_icm,
-            use_container_width=True,
-            key="barras_icm_municipal"
-        )
-    
-             
+      ## aca iba la grafica
 #################################################################################################################################
 ##########################################################################################################################################
 ###################################################################################################################################
@@ -1384,10 +1299,12 @@ elif menu == "Coyuntura":
     import os
     from pathlib import Path
     import plotly.graph_objects as go
+    from pathlib import Path
 
+    BASE_DIR = Path(__file__).parent.parent
+    ejec_path = BASE_DIR / "data" / "eje_ing_clean25.xlsx"
+    prog_path = BASE_DIR / "data" / "pro_ing_clean25.xlsx"
 
-    ejec_path = r"C:\PEPE_TERRITORIAL\data\eje_ing_clean25.xlsx"
-    prog_path = r"C:\PEPE_TERRITORIAL\data\pro_ing_clean25.xlsx" 
 
     @st.cache_data
     def cargar_datos(ejec_path, prog_path):
