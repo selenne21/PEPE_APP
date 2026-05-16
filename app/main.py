@@ -536,10 +536,10 @@ elif  menu=="Ingresos":
         ##########################MUNICIPAL##############################################################
     with tab3:
 
-        ##Filtro de departamento
-        ###Crear una lista sin Bogota(MI FILL)departamentos para seleccionar
+            ##Filtro de departamento
+        ###Crear una lista sin Bogota
         departamentos_mun = ["Todos"] + sorted(
-        df.loc[
+            df.loc[
                 ~df["Departamento"].astype(str)
                 .str.strip()
                 .str.lower()
@@ -547,12 +547,18 @@ elif  menu=="Ingresos":
                 "Departamento"
             ].dropna().unique()
         )
-        ###SELECTOR
-        seleccionar_depto_mun=st.selectbox("Selecciona un Departamento", departamentos_mun ,key="mun_depto")
-        ##se queda solo con el depto seleccionado y municipios (MI FILL)
+
+        ###Selector departamento
+        seleccionar_depto_mun = st.selectbox(
+            "Selecciona un Departamento",
+            departamentos_mun,
+            key="mun_depto"
+        )
+
+        ##Filtrar municipios según departamento
         if seleccionar_depto_mun == "Todos":
             df_municipios_base = df[
-                (df["Tipo de Entidad"] == "Municipio") &
+                (df["Tipo de Entidad"].astype(str).str.strip() == "Municipio") &
                 (~df["Entidad"].astype(str)
                 .str.strip()
                 .str.lower()
@@ -561,24 +567,36 @@ elif  menu=="Ingresos":
 
         else:
             df_municipios_base = df[
-                (df["Departamento"] == seleccionar_depto_mun) &
-                (df["Tipo de Entidad"] == "Municipio") &
+                (df["Departamento"].astype(str).str.strip() == seleccionar_depto_mun.strip()) &
+                (df["Tipo de Entidad"].astype(str).str.strip() == "Municipio") &
                 (~df["Entidad"].astype(str)
                 .str.strip()
                 .str.lower()
                 .str.contains("bogot", na=False))
             ].copy()
+
         #################################################################################
-        municipios_lista = ["Todos"] + sorted(df_municipios_base["Entidad"].dropna().unique())
+
+        municipios_lista = ["Todos"] + sorted(
+            df_municipios_base["Entidad"].dropna().unique()
+        )
+
         ##Filtro Municipio
-        seleccionar_municipio=st.selectbox("Selecciona un Municipio", municipios_lista,key="mun_entidad")
-        ##data ya filtrada
+        seleccionar_municipio = st.selectbox(
+            "Selecciona un Municipio",
+            municipios_lista,
+            key="mun_entidad"
+        )
+
+        ##Data ya filtrada
         if seleccionar_municipio == "Todos":
-           df_filtrado_m_d = df_municipios_base.copy()
+            df_filtrado_m_d = df_municipios_base.copy()
+
         else:
-           df_filtrado_m_d = df_municipios_base[
-           df_municipios_base["Entidad"] == seleccionar_municipio
-           ].copy()
+            df_filtrado_m_d = df_municipios_base[
+                df_municipios_base["Entidad"].astype(str).str.strip()
+                == seleccionar_municipio.strip()
+            ].copy()
            ##########################################################################################
         st.write("Cifras en miles de millones de pesos")
         col1, col2 = st.columns(2)
@@ -675,50 +693,46 @@ elif  menu=="Ingresos":
            
         ############################SGP MUNICIPAL##################################
         #############################################################################
-        st.subheader("Sistema General de Participaciones (SGP)")
-        col1, col2 = st.columns(2)
-        with col1:
-            ### FILTROS
+            st.subheader("Sistema General de Participaciones (SGP)")
+           ### FILTROS
             nombre_depto_sgp_m = seleccionar_depto_mun
+
             equivalencias_sgp = {
-            "San Andrés, Providencia y Santa Catalina":
-            "Archipiélago de San Andrés"
+                "San Andrés, Providencia y Santa Catalina": "Archipiélago de San Andrés"
             }
+
             nombre_depto_sgp_m = equivalencias_sgp.get(
-            seleccionar_depto_mun,
-            seleccionar_depto_mun
+                seleccionar_depto_mun,
+                seleccionar_depto_mun
             )
-            ## SI ES TODOS LOS MUNICIPIOS
-            if seleccionar_municipio == "Todos":
+
+            ## CASO 1: TODOS LOS DEPARTAMENTOS Y TODOS LOS MUNICIPIOS
+            if seleccionar_depto_mun == "Todos" and seleccionar_municipio == "Todos":
+
                 df_sgp_municipio = df_sgp[
-                (df_sgp["Nombre Departamento"]
-                    .str.strip()
-                    .str.lower()
-                    == nombre_depto_sgp_m.strip().lower())
-                    &
-                    (df_sgp["Tipo Entidad"]
-                    .str.strip()
-                    .str.lower() == "municipio")
+                    df_sgp["Tipo Entidad"].astype(str).str.strip().str.lower() == "municipio"
                 ].copy()
-            ## SI ES UN MUNICIPIO ESPECÍFICO
-            else:
+
+            ## CASO 2: UN DEPARTAMENTO Y TODOS SUS MUNICIPIOS
+            elif seleccionar_municipio == "Todos":
+
                 df_sgp_municipio = df_sgp[
-                    (df_sgp["Nombre Departamento"]
-                    .str.strip()
-                    .str.lower()
-                    == nombre_depto_sgp_m.strip().lower())
-                    &
-                    (df_sgp["Nombre Entidad"]
-                    .str.strip()
-                    .str.lower()
-                    == seleccionar_municipio.strip().lower())
-                    &
-                    (df_sgp["Tipo Entidad"]
-                    .str.strip()
-                    .str.lower() == "municipio")
-                    ].copy()
+                    (df_sgp["Nombre Departamento"].astype(str).str.strip().str.lower() == nombre_depto_sgp_m.strip().lower()) &
+                    (df_sgp["Tipo Entidad"].astype(str).str.strip().str.lower() == "municipio")
+                ].copy()
+
+            ## CASO 3: UN MUNICIPIO ESPECÍFICO
+            else:
+
+                df_sgp_municipio = df_sgp[
+                    (df_sgp["Nombre Departamento"].astype(str).str.strip().str.lower() == nombre_depto_sgp_m.strip().lower()) &
+                    (df_sgp["Nombre Entidad"].astype(str).str.strip().str.lower() == seleccionar_municipio.strip().lower()) &
+                    (df_sgp["Tipo Entidad"].astype(str).str.strip().str.lower() == "municipio")
+                ].copy()
         #################################################################################
         ##Graficos
+      
+        col1, col2 = st.columns(2)
         with col1:
             ##Gráfica area 
                  area_df_sgp_mun= (df_sgp_municipio.groupby(["Año", "nivel_1"])["valor_constante_25"].sum().reset_index())
