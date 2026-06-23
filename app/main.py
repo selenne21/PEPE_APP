@@ -2107,52 +2107,52 @@ elif  menu=="Presupuesto actual":
 ###########################################################################################################################
 #Descargas
 elif menu == "Descarga de datos":
-    st.header("Descarga de datos")
+    st.warning("La descarga de datos está temporalmente deshabilitada.")
 
-    base_dir = Path(__file__).parent.parent
+    #base_dir = Path(__file__).parent.parent
 
-    def convertir_xlsx(ruta_parquet):
-        df = pd.read_parquet(ruta_parquet)
-        buffer = BytesIO()
-        df.to_excel(buffer, index=False, engine="openpyxl")
-        buffer.seek(0)
-        return buffer.getvalue()
+    #def convertir_xlsx(ruta_parquet):
+      #  df = pd.read_parquet(ruta_parquet)
+      #  buffer = BytesIO()
+      #  df.to_excel(buffer, index=False, engine="openpyxl")
+      #  buffer.seek(0)
+      #  return buffer.getvalue()
 
-    datasets = [
-        {
-            "titulo":  "Ingresos territoriales",
-            "archivo": base_dir / "data" / "ingresos_ipc_pop.parquet",
-            "nombre":  "ingresos_ipc_pop.xlsx",
-            "boton":   "Descargar datos completos (xlsx)",
-        },
-        {
-            "titulo":  "Gastos territoriales",
-            "archivo": base_dir / "data" / "ejecucion_deflactada_mun.parquet",
-            "nombre":  "ejecucion_deflactada_mun.xlsx",
-            "boton":   "Descargar datos completos (xlsx)",
-        },
-        {
-            "titulo":  "Sistema General de Participaciones (SGP)",
-            "archivo": base_dir / "data" / "datos_sgp_pib_ic.parquet",
-            "nombre":  "datos_sgp_pib_ic.xlsx",
-            "boton":   "Descargar datos completos (xlsx)",
-        },
-    ]
+   # datasets = [
+      #  {
+      #      "titulo":  "Ingresos territoriales",
+      #      "archivo": base_dir / "data" / "ingresos_ipc_pop.parquet",
+      #      "nombre":  "ingresos_ipc_pop.xlsx",
+      #      "boton":   "Descargar datos completos (xlsx)",
+     #   },
+     #   {
+      #      "titulo":  "Gastos territoriales",
+       #     "archivo": base_dir / "data" / "ejecucion_deflactada_mun.parquet",
+        #    "nombre":  "ejecucion_deflactada_mun.xlsx",
+         #   "boton":   "Descargar datos completos (xlsx)",
+        #},
+  #      {
+    #        "titulo":  "Sistema General de Participaciones (SGP)",
+   #         "archivo": base_dir / "data" / "datos_sgp_pib_ic.parquet",
+    #        "nombre":  "datos_sgp_pib_ic.xlsx",
+    #        "boton":   "Descargar datos completos (xlsx)",
+   #     },
+   # ]
 
-    for ds in datasets:
-        st.subheader(ds["titulo"])
-        if ds["archivo"].exists():
-            st.download_button(
-                label=ds["boton"],
-                data=convertir_xlsx(ds["archivo"]),
-                file_name=ds["nombre"],
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                key=ds["nombre"],
-            )
-        else:
-            st.warning(f"Archivo no disponible: {ds['archivo'].name}")
-        st.divider()
+   # for ds in datasets:
+   #     st.subheader(ds["titulo"])
+   #     if ds["archivo"].exists():
+     #       st.download_button(
+     #           label=ds["boton"],
+    #            data=convertir_xlsx(ds["archivo"]),
+    #            file_name=ds["nombre"],
+    #            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    #            key=ds["nombre"],
+    #        )
+    #    else:
+    #        st.warning(f"Archivo no disponible: {ds['archivo'].name}")
+    #    st.divider()
 
-        st.write("Base dir:", base_dir)
+    #    st.write("Base dir:", base_dir)
 
        
